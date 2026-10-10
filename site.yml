@@ -1,0 +1,6 @@
+---
+- name: Déployer Apache sur Ubuntu et CentOS
+  hosts: apache_servers
+  become: true
+  roles:
+    - apache

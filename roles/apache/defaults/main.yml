@@ -1,0 +1,12 @@
+---
+#Noms du paquet et du service apache selon la famille d'OS
+apache_debian_package: apache2
+apache_debian_service: apache2
+
+apache_redhat_package: httpd
+apache_redhat_service: httpd
+
+
+
+# Nom affiché sur la page d'accueil (étape 8)
+server_name: "{{ inventory_hostname }}"

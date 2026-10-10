@@ -1,0 +1,15 @@
+---
+- name: Installer le paquet Apache (apt)
+  ansible.builtin.apt:
+    name: "{{ apache_debian_package }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Démarrer Apache et l'activer au démarrage
+  ansible.builtin.service:
+    name: "{{ apache_debian_service }}"
+    state: started
+    enabled: true
+
+    

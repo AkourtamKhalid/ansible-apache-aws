@@ -1,0 +1,11 @@
+---
+- name: Installer le paquet Apache (dnf)
+  ansible.builtin.dnf:
+    name: "{{ apache_redhat_package }}"
+    state: present
+
+- name: Démarrer Apache et l'activer au démarrage
+  ansible.builtin.service:
+    name: "{{ apache_redhat_service }}"
+    state: started
+    enabled: true
