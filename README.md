@@ -1,6 +1,6 @@
 # Déploiement automatisé d'Apache sur AWS EC2 avec Ansible (Ubuntu + RedHat)
 
-Projet réalisé dans le cadre de ma formation DevOps chez **AUBERTECH**.
+Projet réalisé chez **AUBERTECH-Chapiock**.
 
 **Objectif :** depuis une seule machine de contrôle, déployer et configurer automatiquement un serveur web Apache sur **deux distributions Linux différentes** hébergées sur **AWS EC2**, avec **un seul rôle Ansible**, une page HTML personnalisée par serveur, et un playbook **idempotent**.
 
