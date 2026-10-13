@@ -3,3 +3,9 @@
 .vault_pass*
 *.retry
 .ansible/
+
+# Inventaire réel (IP qui changent) : on publie inventory.ini.example
+inventory.ini
+
+# Sorties de commandes gardées comme preuves
+preuve-*.txt

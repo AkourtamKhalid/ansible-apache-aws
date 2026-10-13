@@ -12,4 +12,62 @@
     state: started
     enabled: true
 
-    
+
+# --- Pare-feu UFW (tuto Ubuntu, étape 2) ---
+- name: UFW - autoriser SSH (avant d'activer, sinon on perd la connexion)
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: UFW - autoriser le profil Apache (port 80 uniquement)
+  community.general.ufw:
+    rule: allow
+    name: Apache
+
+- name: UFW - activer le pare-feu
+  community.general.ufw:
+    state: enabled    
+
+
+
+# Hôte virtuel 
+- name: Site - créer le dossier du site
+  ansible.builtin.file:
+    path: "/var/www/{{ server_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Site - déployer la page d'accueil dans le dossier du site
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "/var/www/{{ server_name }}/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: VirtualHost - déployer la configuration du site
+  ansible.builtin.template:
+    src: vhost-ubuntu.conf.j2
+    dest: "/etc/apache2/sites-available/{{ server_name }}.conf"
+    mode: "0644"
+  notify: Redémarrer apache2
+
+- name: VirtualHost - activer le site (a2ensite)
+  ansible.builtin.command:
+    cmd: "a2ensite {{ server_name }}.conf"
+    creates: "/etc/apache2/sites-enabled/{{ server_name }}.conf"
+  notify: Redémarrer apache2
+
+- name: VirtualHost - désactiver le site par défaut (a2dissite)
+  ansible.builtin.command:
+    cmd: a2dissite 000-default.conf
+    removes: /etc/apache2/sites-enabled/000-default.conf
+  notify: Redémarrer apache2
+
+- name: Apache - tester la configuration
+  ansible.builtin.command: apache2ctl configtest
+  changed_when: false    
+
+  

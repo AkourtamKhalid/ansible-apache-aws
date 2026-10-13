@@ -9,3 +9,82 @@
     name: "{{ apache_redhat_service }}"
     state: started
     enabled: true
+
+
+# Pare-feu firewalld :
+- name: firewalld - installer le paquet
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+
+- name: firewalld - démarrer et activer au démarrage
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: firewalld - autoriser SSH et HTTP
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop:
+    - ssh
+    - http    
+    
+
+# Hôte virtuel
+- name: Site - créer les dossiers html et log
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "/var/www/{{ server_name }}/html"
+    - "/var/www/{{ server_name }}/log"
+
+- name: Site - déployer la page d'accueil dans le dossier du site
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "/var/www/{{ server_name }}/html/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: VirtualHost - créer sites-available et sites-enabled
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /etc/httpd/sites-available
+    - /etc/httpd/sites-enabled
+
+- name: VirtualHost - dire à Apache de lire sites-enabled
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    line: "IncludeOptional sites-enabled/*.conf"
+  notify: Redémarrer httpd
+
+- name: VirtualHost - déployer la configuration du site
+  ansible.builtin.template:
+    src: vhost-centos.conf.j2
+    dest: "/etc/httpd/sites-available/{{ server_name }}.conf"
+    mode: "0644"
+  notify: Redémarrer httpd
+
+- name: VirtualHost - activer le site (lien symbolique)
+  ansible.builtin.file:
+    src: "/etc/httpd/sites-available/{{ server_name }}.conf"
+    dest: "/etc/httpd/sites-enabled/{{ server_name }}.conf"
+    state: link
+  notify: Redémarrer httpd
+
+- name: Apache - tester la configuration
+  ansible.builtin.command: apachectl configtest
+  changed_when: false
+
+
